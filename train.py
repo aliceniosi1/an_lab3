@@ -7,7 +7,6 @@ def train(epoch, model, train_loader, criterion, optimizer):
     for batch_idx, (inputs, targets) in enumerate(train_loader):
         inputs, targets = inputs.cuda(), targets.cuda()
 
-        # todo...
         outputs = model(inputs)
         loss = criterion(outputs, targets) 
         optimizer.zero_grad()
