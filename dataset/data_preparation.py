@@ -12,7 +12,7 @@ def data_preparation(batch_size=64):
 
     # Trasformazioni base
     transform = T.Compose([
-        T.Resize((224, 224)),  # adattato per reti come ResNet
+        T.Resize((64, 64)),  # adattato per reti come ResNet
         T.ToTensor(),
         T.Normalize(mean=[0.485, 0.456, 0.406],
                     std=[0.229, 0.224, 0.225]),

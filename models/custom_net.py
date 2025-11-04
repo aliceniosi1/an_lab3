@@ -13,7 +13,7 @@ class CustomNet(nn.Module):
         self.conv3 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
         self.pool3 = nn.MaxPool2d(2, 2)  # 16 -> 8
 
-        self.fc1 = nn.Linear(256 * 28 * 28, 200)
+        self.fc1 = nn.Linear(256 * 8 * 8, 200)
 
     def forward(self, x):
         x = self.pool1(self.conv1(x).relu())
