@@ -1,54 +1,34 @@
 import os
-import shutil
-import os
-import shutil
-import urllib.request
-import zipfile
+import requests
+from zipfile import ZipFile
+from io import BytesIO
 
-def download_dataset():
-    # Percorsi
-    data_dir = "data"
-    zip_path = os.path.join(data_dir, "tiny-imagenet-200.zip")
-    extract_dir = os.path.join(data_dir, "tiny-imagenet")
+def download_and_extract_dataset(
+    dataset_url='http://cs231n.stanford.edu/tiny-imagenet-200.zip',
+    dataset_dir='data'
+):
+    """
+    Scarica ed estrae il dataset Tiny ImageNet nella cartella specificata.
+    Se la cartella esiste già, salta il download.
+    """
+    target_path = os.path.join(dataset_dir, 'tiny-imagenet-200')
 
-    # URL del dataset
-    url = "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
+    # Se il dataset è già presente, non riscaricare
+    if os.path.exists(target_path):
+        print(f"✅ Dataset already exists at: {target_path}")
+        return target_path
 
-    # Crea la cartella 'data' se non esiste
-    os.makedirs(data_dir, exist_ok=True)
+    # Assicurati che la directory esista
+    os.makedirs(dataset_dir, exist_ok=True)
 
-    # Scarica il file zip solo se non esiste già
-    if not os.path.exists(zip_path):
-        print("📥 Downloading Tiny ImageNet...")
-        urllib.request.urlretrieve(url, zip_path)
+    print(f"⬇️  Downloading Tiny ImageNet from {dataset_url} ...")
+    response = requests.get(dataset_url)
+
+    if response.status_code == 200:
+        with ZipFile(BytesIO(response.content)) as zip_file:
+            zip_file.extractall(dataset_dir)
+        print(f"✅ Download and extraction complete! Dataset saved to: {target_path}")
     else:
-        print("✅ File already downloaded.")
+        raise Exception(f"❌ Failed to download dataset (HTTP {response.status_code})")
 
-    # Estrai il dataset
-    if not os.path.exists(extract_dir):
-        print("📦 Extracting dataset...")
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_dir)
-    else:
-        print("✅ Dataset already extracted.")
-
-    # Riorganizza la cartella delle immagini di validazione
-    val_dir = os.path.join(extract_dir, "tiny-imagenet-200", "val")
-    annotations_path = os.path.join(val_dir, "val_annotations.txt")
-    images_dir = os.path.join(val_dir, "images")
-
-    print("🗂️ Organizing validation images...")
-    with open(annotations_path) as f:
-        for line in f:
-            fn, cls, *_ = line.split('\t')
-            cls_dir = os.path.join(val_dir, cls)
-            os.makedirs(cls_dir, exist_ok=True)
-            src = os.path.join(images_dir, fn)
-            dst = os.path.join(cls_dir, fn)
-            if os.path.exists(src):
-                shutil.copyfile(src, dst)
-
-    # Rimuovi la cartella originale delle immagini non organizzate
-    shutil.rmtree(images_dir)
-    print("✅ Dataset ready in 'data/tiny-imagenet/tiny-imagenet-200'.")
-
+    return target_path
