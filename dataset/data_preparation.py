@@ -1,14 +1,28 @@
-from torchvision.datasets import ImageFolder
-import torchvision.transforms as T
-import torch
-def data_preparation():
-    transform = T.Compose([
-    T.Resize((224, 224)),  # Resize to fit the input dimensions of the network
-    T.ToTensor(),
-    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), ])
-    tiny_imagenet_dataset_train = ImageFolder(root='tiny-imagenet/tiny-imagenet-200/train', transform=transform)
-    tiny_imagenet_dataset_val = ImageFolder(root='tiny-imagenet/tiny-imagenet-200/val', transform=transform)
-    train_loader = torch.utils.data.DataLoader(tiny_imagenet_dataset_train, batch_size=32, shuffle=True, num_workers=8)
-    val_loader = torch.utils.data.DataLoader(tiny_imagenet_dataset_val, batch_size=32, shuffle=False)
-    return train_loader, tiny_imagenet_dataset_val
+import os
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+def data_preparation(batch_size=64):
+    data_root = os.path.join("data", "tiny-imagenet", "tiny-imagenet-200")
+
+    train_dir = os.path.join(data_root, "train")
+    val_dir = os.path.join(data_root, "val")
+
+    # Trasformazioni base
+    transform = transforms.Compose([
+        transforms.Resize((64, 64)),
+        transforms.ToTensor(),
+    ])
+
+    # Dataset
+    train_dataset = datasets.ImageFolder(train_dir, transform=transform)
+    val_dataset = datasets.ImageFolder(val_dir, transform=transform)
+
+    # DataLoader
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    print(f"✅ Loaded {len(train_dataset)} training images and {len(val_dataset)} validation images.")
+
+    return train_loader, val_loader
 
