@@ -1,5 +1,5 @@
 import torch
-def validate(model, val_loader, criterion, device):
+def validate(model, val_loader, criterion, device="cuda"):
     model.eval()
     val_loss, correct, total = 0.0, 0, 0
     with torch.no_grad():
